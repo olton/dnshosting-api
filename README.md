@@ -2,7 +2,7 @@
 
 This is a implementation of end user classes to access to [dnshosting.org](https://dnshosting.org) API.
 
-+ [x] PHP - in release
++ [ ] PHP - in develop
 + [ ] JavaScript - in develop
 
 ## Authors
