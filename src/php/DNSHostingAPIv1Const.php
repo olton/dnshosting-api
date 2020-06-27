@@ -1,5 +1,6 @@
 <?php
 
+namespace Services\DnsHosting;
 
 class DNSHostingAPIv1Const {
     const COMMAND_LOGIN = "auth";

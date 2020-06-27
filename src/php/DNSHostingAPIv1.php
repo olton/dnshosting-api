@@ -1,6 +1,10 @@
 <?php
 
+namespace Services\DnsHosting;
+
 require_once "DNSHostingAPIv1Const.php";
+
+use Exception;
 
 class DNSHostingAPIv1 {
     private $_version = "1.0.0";
