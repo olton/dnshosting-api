@@ -1,5 +1,7 @@
 <?php
 
+namespace Services\DnsHosting;
+
 include "../../src/php/DNSHostingAPIv1.php";
 include "auth.php";
 

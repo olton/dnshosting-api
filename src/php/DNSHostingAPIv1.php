@@ -86,6 +86,12 @@ class DNSHostingAPIv1 {
         $this->_command = json_encode($data);
         $this->_command_array = $data;
 
+        $_method = strtoupper($method);
+
+        if ($_method === 'PUT' || $_method === 'DELETE') {
+            array_push($headers, "Content-Length: " . strlen($this->_command));
+        }
+
         try {
             $ch = curl_init();
 
@@ -94,8 +100,12 @@ class DNSHostingAPIv1 {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-            if (strtoupper($method) == 'POST') {
-                curl_setopt($ch, CURLOPT_POST, true);
+            if ($_method !== 'GET') {
+                switch ($_method) {
+                    case 'POST': curl_setopt($ch, CURLOPT_POST, true); break;
+                    case 'PUT':
+                    case 'DELETE': curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $_method); break;
+                }
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_command);
             } else {
                 curl_setopt($ch, CURLOPT_HTTPGET, true);
@@ -290,7 +300,7 @@ class DNSHostingAPIv1 {
     public function DomainZoneUpdate($domain, $records){
         $command = str_replace(":domain", $domain, DNSHostingAPIv1Const::COMMAND_DOMAIN_ZONE);
         return $this->_execute(
-            "POST",
+            "PUT",
             $command,
             $records
         );
