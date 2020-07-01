@@ -9,23 +9,20 @@ use Exception;
 class DNSHostingAPIv1 {
     private $_version = "1.0.0";
 
-    private $end_point = "";
+    private $end_point;
 
-    private $_curl_present = false;
+    private $_curl_present;
     private $_curl_info = null;
     private $_curl_raw_result = null;
     private $_curl_error = null;
 
-    private $_tr_prefix = "";
-    private $_tr_suffix = "";
+    private $_tr_prefix;
+    private $_tr_suffix;
 
     private $_auth_token = "";
 
     private $_command = "";
     private $_command_array = [];
-
-    private $_user = "";
-    private $_password = "";
 
     private $error_api= null;
     private $error = null;
@@ -134,6 +131,13 @@ class DNSHostingAPIv1 {
         }
     }
 
+    private function _resetError(){
+        $this->error_api = null;
+        $this->error = null;
+        $this->error_message = "";
+        $this->errors = [];
+    }
+
     /**
      * Execute API method
      * @param $method
@@ -142,6 +146,8 @@ class DNSHostingAPIv1 {
      * @return bool|mixed
      */
     private function _execute($method, $command, $arguments = []){
+        $this->_resetError();
+
         $result = $this->_curlExec($method, $command, $arguments);
 
         if (!$result) {
