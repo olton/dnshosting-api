@@ -15,6 +15,8 @@ class DNSHostingAPIv1 {
     private $_curl_info = null;
     private $_curl_raw_result = null;
     private $_curl_error = null;
+    private $_curl_error_code = 0;
+    private $_exception = 0;
 
     private $_tr_prefix;
     private $_tr_suffix;
@@ -96,12 +98,15 @@ class DNSHostingAPIv1 {
             curl_setopt($ch, CURLOPT_HEADER, 0);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_VERBOSE, true);
+
+            $verbose = fopen(dirname(__FILE__) . '/log/curl.log', 'w+');
+            curl_setopt($ch, CURLOPT_STDERR, $verbose);
 
             if ($_method !== 'GET') {
                 switch ($_method) {
                     case 'POST': curl_setopt($ch, CURLOPT_POST, true); break;
-                    case 'PUT':
-                    case 'DELETE': curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $_method); break;
+                    default: curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $_method);
                 }
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_command);
             } else {
@@ -112,6 +117,8 @@ class DNSHostingAPIv1 {
 
             $this->_curl_raw_result = curl_exec($ch);
             $this->_curl_info = curl_getinfo($ch);
+            $this->_curl_error = curl_error($ch);
+            $this->_curl_error_code = curl_errno($ch);
 
             curl_close($ch);
 
@@ -126,15 +133,15 @@ class DNSHostingAPIv1 {
 
             return $this->result;
         } catch (Exception $e) {
-            $this->_curl_error = $e->getMessage();
+            $this->_exception = $e->getMessage();
             return false;
         }
     }
 
     private function _resetError(){
         $this->error_api = null;
-        $this->error = null;
-        $this->error_message = "";
+        $this->error = 0;
+        $this->error_message = "OK";
         $this->errors = [];
     }
 
@@ -226,6 +233,10 @@ class DNSHostingAPIv1 {
         return $this->errors;
     }
 
+    public function GetException(){
+        return $this->_exception;
+    }
+
     /**
      * Get last API command
      * @param bool $as_array
@@ -235,14 +246,13 @@ class DNSHostingAPIv1 {
         return $as_array ? $this->_command_array : $this->_command;
     }
 
-    public function Login($login, $password, $reseller){
+    public function Login($login, $password){
         return $this->_execute(
             "POST",
             DNSHostingAPIv1Const::COMMAND_LOGIN,
             [
                 "login" => $login,
-                "password" => $password,
-                "reseller" => $reseller
+                "password" => $password
             ]
         );
     }
